@@ -1,0 +1,75 @@
+services:
+  keycloak-one:
+    container_name: keycloak_container_one
+    image: <image-name>:<tag>
+    command: start --optimized
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: password
+      KC_DB: <database-vendor>
+      KC_DB_URL_HOST: <database-host>
+      KC_DB_URL_DATABASE: <database-name>
+      KC_DB_USERNAME: <database-username>
+      KC_DB_PASSWORD: <database-password>
+      KC_DB_SCHEMA: public
+      KC_PROXY: edge
+      KC_HOSTNAME: https://mykeycloak:8443
+      KC_HOSTNAME_ADMIN: https://mykeycloak:8443
+      KC_HTTP_ENABLED: true
+      KC_PROXY_HEADERS: xforwarded
+      JGROUPS_DISCOVERY_PROTOCOL: JDBC_PING
+      KC_CACHE_CONFIG_FILE: cache-ispn.xml
+    volumes:
+      - ${PWD}/cache-ispn.xml:/opt/keycloak/conf/cache-ispn.xml
+    depends_on:
+      - postgres
+  keycloak-two:
+    container_name: keycloak_container_two
+    image: <image-name>:<tag>
+    command: start --optimized
+    environment:
+      KC_DB: <database-vendor>
+      KC_DB_URL_HOST: <database-host>
+      KC_DB_URL_DATABASE: <database-name>
+      KC_DB_USERNAME: <database-username>
+      KC_DB_PASSWORD: <database-password>
+      KC_DB_SCHEMA: public
+      KC_PROXY: edge
+      KC_HOSTNAME: https://<domain>:8443
+      KC_HOSTNAME_ADMIN: https://<domain>:8443
+      KC_HTTP_ENABLED: true
+      KC_PROXY_HEADERS: xforwarded
+      JGROUPS_DISCOVERY_PROTOCOL: JDBC_PING
+      KC_CACHE_CONFIG_FILE: cache-ispn.xml
+    volumes:
+      - ${PWD}/cache-ispn.xml:/opt/keycloak/conf/cache-ispn.xml
+    depends_on:
+      - postgres
+      - keycloak-one
+  postgres:
+    container_name: keycloak-database
+    image: postgres:14
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: <database-name>
+      POSTGRES_USER: <database-username>
+      POSTGRES_PASSWORD: <database-password>
+    ports:
+      - '5432:5432'
+  nginx:
+    container_name: keycloak-lb
+    image: nginx:alpine
+    volumes:
+      - ${PWD}/nginx.conf:/etc/nginx/conf.d/keycloak.conf
+      - ${PWD}/certs:/etc/nginx/certs
+    ports:
+      - '8080:80'
+      - '8443:443'
+    depends_on:
+      - keycloak-one
+      - keycloak-two
+
+volumes:
+  pg-data:
+
