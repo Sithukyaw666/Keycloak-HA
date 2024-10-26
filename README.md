@@ -57,7 +57,19 @@ Replace `<database-name>`, `<database-username>`, and `<database-password>` with
 Open the `nginx.conf` file and make the necessary updates:
 
 Change the server name and any other configuration parameters to fit your environment.
-Ensure SSL configuration is correct if you are using HTTPS.
+Create the self signed certificate if you want to enable SSL:
+```bash
+mkdir certs
+cd certs
+openssl req -x509 -out <certificate>.crt -keyout <key>.key \
+  -newkey rsa:2048 -nodes -sha256 \
+  -subj '/CN=localhost' -extensions EXT -config <( \
+   printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+```
+Ensure SSL configuration is correct if you are using HTTPS. 
+
+
+
 ### 5. Start the Services
 Once you have updated the configurations, you can start the services using Docker Compose:
 ```bash
@@ -72,9 +84,9 @@ After the services are up, you can access Keycloak by navigating to `https://<do
 Use the following credentials to log in to the Keycloak admin console:
 ```
 Username: admin
-Password: admin
+Password: password
 ```
-(You may want to change these credentials for production use.)
+
 
 ### Additional Notes
 Ensure you have valid SSL certificates if running in a production environment.
