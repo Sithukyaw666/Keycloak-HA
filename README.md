@@ -1,6 +1,6 @@
 # Keycloak High Availability (HA) Setup
 
-This project provides a configuration for deploying Keycloak in a high availability setup using Docker. Follow the steps below to clone the repository, build the Docker images, and configure the necessary files.
+This project provides a configuration for deploying Keycloak in a high availability setup using Docker.
 
 ## Prerequisites
 
